@@ -235,6 +235,7 @@ jobs:
   load-matrix:
       name: Load Matrix
       runs-on: ubuntu-latest
+      needs: approve
       outputs:
         matrix_team: ${{ steps.import-matrix.outputs.matrix_team }}
         matrix_build: ${{ steps.import-matrix.outputs.matrix_build }}
