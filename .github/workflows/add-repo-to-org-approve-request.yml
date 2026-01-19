@@ -127,9 +127,7 @@ jobs:
           repo-name: ${{ fromJson(steps.parse.outputs.json)['repo-name'] }}
           owner: ${{ github.repository_owner }}
           token: ${{ steps.token.outputs.token }}
-          visibility: 'internal'
-
-      
+          visibility: 'public'      
 
       - name: Convert Template Status To Boolean
         id: convert-template-status
