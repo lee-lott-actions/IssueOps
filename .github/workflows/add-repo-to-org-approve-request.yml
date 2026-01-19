@@ -298,6 +298,7 @@ jobs:
           permission-issues: write                          #Used to parse the issue body, Assign Issue to Commenter, write comments and close the issue
           permission-administration: write                  #Used to add the team to the repo
           permission-members: write                         #Used to verify commentor is a member of the Approver Team and create new team in org
+          permission-repository-custom-properties: write    #Used to enable build check custom property
 
       - name: Parse Issue Body
         id: parse
