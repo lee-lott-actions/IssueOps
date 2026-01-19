@@ -14,9 +14,9 @@ Please complete the following steps after cloning to your organization:
 2. Verify there is a team called `issue-ops-approvers` in the organization. Create the team if it does not exist.  Add the necessary staff to the team.
 3. Go the the add-team-to-org-approve-request.yml in the `.github/workflows` folder.  Update the `add-members` job maintainer matrix with member names who would be maintainers for the new team.
 4. In each .md file in the docs folder, update the link to the IssueOps Approvers Team with the correct organization name.
-5. Create a repository variable, `ISSUEOPSBOT_APP_ID`.  Assign it the APP ID of the GitHub App `LA-ISSUEOPS`.
-6. Create a repository secret, `ISSUEOPSBOT_APP_PRIVATE_KEY`.  Assign it the private key of the GitHub App `LA-ISSUEOPS`.
-7. Add the `LA-ISSUEOPS` GitHub App to the organization to which the IssueOps repos was added.
+5. Create a repository variable, `ISSUEOPSBOT_APP_ID`.  Assign it the APP ID of the IssueOps GitHub App.
+6. Create a repository secret, `ISSUEOPSBOT_APP_PRIVATE_KEY`.  Assign it the private key of the IssueOps GitHub App.
+7. Add the IssueOps GitHub App to the organization to which the IssueOps repos was added.
 8. Add the following to the About section:
     - This is an IssueOps repository that provides a centralized hub for managing operational workflows, incidents, and tasks through Git issues. It integrates automation tools, scripts, and documentation to streamline processes, track progress, and foster collaboration, treating issues as actionable units for operations.
 9. Remove all labels from the repository and add the following labels with the accompanying color codes and descriptions:
