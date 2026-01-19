@@ -1,0 +1,25 @@
+{
+  "team_matrix": {
+  "team": [
+    {
+      "team": "code-approvers",
+      "role": "push"      
+    },
+    {
+      "team": "cod-approvers-admins",
+      "role": "push"      
+    },
+    {
+      "team": "developers",
+      "role": "push"      
+    }    
+    ]
+  },
+  "build_matrix": {
+    "build": [
+      {
+      "name": "requires-build-check",
+      "value": "Enabled"
+      }      
+    ]}
+}

@@ -1,0 +1,174 @@
+name: Remove Member From Team - Validate Request
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+  issue_comment:
+    types: [created]
+
+env:
+  ISSUE_TEMPLATE_NAME: "remove-member-from-team.yml"
+
+jobs:
+  validate:
+    name: Remove Member From Team - Validate Request
+    runs-on: ubuntu-latest
+    if: ${{ (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'remove-member-from-team')) 
+      || (github.event_name == 'issue_comment' && contains(github.event.issue.labels.*.name, 'remove-member-from-team') && contains(github.event.comment.body, '.validate')) }}
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v5
+        
+      # Set up Node.js for issue-ops actions (parser and validator)
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get GitHub App Token
+        id: token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
+          private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.repository_name }}
+          permission-issues: write
+          permission-members: read
+
+      # Remove existing labels to start fresh
+      - name: Remove Labels
+        id: remove-label
+        uses: issue-ops/labeler@v2
+        with:
+          action: remove
+          github_token: ${{ steps.token.outputs.token }}
+          labels: |
+            validated
+            approved
+            denied
+            submitted
+          issue_number: ${{ github.event.issue.number }}
+          repository: ${{ github.repository }}
+
+      - name: ReOpen Issue If Closed
+        if: ${{ github.event.issue.state == 'closed'}}
+        id: reopen-issue
+        uses: lee-lott-actions/open-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}
+
+      - name: Parse Issue Body
+        id: parse
+        uses: issue-ops/parser@v4
+        with:
+          body: ${{ github.event.issue.body }}
+          issue-form-template: ${{ env.ISSUE_TEMPLATE_NAME }}
+          workspace: ${{ github.workspace }}
+
+      - name: Validate Request
+        id: validate
+        uses: issue-ops/validator@v3
+        with:
+          add-comment: false
+          github-token: ${{ steps.token.outputs.token }}
+          issue-form-template: ${{ env.ISSUE_TEMPLATE_NAME }}
+          issue-number: ${{ github.event.issue.number }}
+          parsed-issue-body: ${{ steps.parse.outputs.json }}
+          workspace: ${{ github.workspace }}
+
+      - name: Slugify Member Name
+        if: ${{ steps.validate.outputs.result == 'success' }}
+        id: slugify-member
+        uses: lee-lott-actions/slugify@v1
+        with:
+          input-string: ${{ fromJson(steps.parse.outputs.json)['member-name'] }}
+
+      - name: Slugify Team Name
+        if: ${{ steps.validate.outputs.result == 'success' }}
+        id: slugify-team
+        uses: lee-lott-actions/slugify@v1
+        with:
+          input-string: ${{ fromJson(steps.parse.outputs.json)['team-name'] }}
+
+      - name:  Validate Member Exists
+        if: ${{ steps.validate.outputs.result == 'success' && steps.slugify-member.outputs.result == 'success' }}
+        id: validate-member
+        uses: lee-lott-actions/verify-member-exists@v1
+        with:
+          member-name: ${{ steps.slugify-member.outputs.slug }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}          
+          
+      - name: Validate Team Exists
+        if: ${{ steps.validate.outputs.result == 'success' && steps.slugify-team.outputs.result == 'success' }}
+        id: validate-team
+        uses: lee-lott-actions/verify-team-exists@v1
+        with:
+          team-name: ${{ steps.slugify-team.outputs.slug }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+
+      # Enter Comment with the results of the validation process.
+      - name: Comment on Validation Result
+        if: always()
+        id: create-message
+        run: |
+          if [ "${{ job.status }}" != "success" ]; then
+            MESSAGE="❌ Failed to validate request to remove member from team. Check the workflow logs for details."
+          elif [ "${{ steps.validate.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to validate request to remove member from team. Error: Invalid issue form data. Check required fields. Verify disallowed characters are not present: $, #, *, &, %, double quote, backslash, backtick, forward slash, single quote."
+          elif [ "${{ steps.slugify-member.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to validate request to remove member from team. Error: Failed to slugify member name."
+          elif [ "${{ steps.slugify-team.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to validate request to remove member from team. Error: Failed to slugify team name."            
+          elif [ "${{ steps.validate-member.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to validate request to remove member from team. Error: ${{ steps.validate-member.outputs.error-message }}"            
+          elif [ "${{ steps.validate-member.outputs.member-exists }}" != "true" ]; then
+            MESSAGE="❌ Failed to validate request to remove member from team. Error: Member does not exist."
+          elif [ "${{ steps.validate-team.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to validate request to remove member from team . Error: ${{ steps.validate-team.outputs.error-message }}"
+          elif [ "${{ steps.validate-team.outputs.team-exists }}" != "true" ]; then
+            MESSAGE="❌ Failed to validate request to remove member from team. Error: Team does not exist."
+          else
+            MESSAGE="✅ Successfully validated request to remove member from team. Please comment with '.submit' to proceed."
+          fi
+
+          echo "comment=$MESSAGE" >> $GITHUB_OUTPUT
+
+      - name: Post Comment        
+        if: always()
+        id: post-comment
+        uses: lee-lott-actions/post-issue-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          message: ${{ steps.create-message.outputs.comment }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}
+          
+      # Add 'validated' label if validation succeeds
+      - if: >-
+          job.status == 'success'
+          && steps.validate.outputs.result == 'success'
+          && steps.validate-team.outputs.team-exists == 'true'
+          && steps.validate-member.outputs.member-exists == 'true'
+        name: Add Validated Label
+        id: add-label
+        uses: issue-ops/labeler@v2
+        with:
+          action: add
+          github_token: ${{ steps.token.outputs.token }}
+          labels: |
+            validated
+          issue_number: ${{ github.event.issue.number }}
+          repository: ${{ github.repository }}  

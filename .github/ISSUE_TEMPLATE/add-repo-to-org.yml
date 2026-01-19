@@ -1,0 +1,54 @@
+name: Add Repository To Organization
+description: Request creation of a new repository from a template
+title: "[Add Repository To Organization] <Enter Repository Name>"
+labels:
+  - add-repo-to-org
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add Repository To Organization
+
+        Use this issue to request a new repository created from a template owned by this GitHub organization. After creating the issue, a member of the IssueOps approver team must add a comment with the `.approve` command. The workflow will create the repository, add a `development` branch, and comment on this issue with the result.
+
+        **Instructions**:
+        - Use the fields below to draft the repository details.
+        - Once complete, enter a comment with the command '.submit'.  This will submit the issue to the approval users.
+        - Only approved users can trigger the repository creation.
+        - If approved, the approver will enter a comment with the command '.approve'.  This will initiate the creation of the new repository.
+        - If denied, the approver will enter a comment with the command '.deny'.  This will close the issue and enter a comment that the request was denied.
+  - type: input
+    id: repo-name
+    attributes:
+      label: Repository Name
+      description: The name of the repository you would like to create
+      placeholder: New Repository Name
+    validations:
+      required: true
+  - type: input
+    id: repo-description
+    attributes:
+      label: Repository Description
+      description: The description of the new repository
+      placeholder: Repository Description
+    validations:
+      required: true
+  - type: input
+    id: template-repo
+    attributes:
+      label: Template Repository
+      description: The name of the template repository on which you would like the new repository to be based.
+      placeholder:  e.g. .github
+    validations:
+      required: true
+  - type: dropdown
+    id: is-template
+    attributes:
+      label: Is the new repository a Template Repository
+      description: Should the new repository be set as a template repository?
+      options:
+        - 'Yes'
+        - 'No'
+      default: 1
+    validations:
+      required: true      

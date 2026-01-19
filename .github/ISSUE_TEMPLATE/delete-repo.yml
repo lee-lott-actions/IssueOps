@@ -1,0 +1,27 @@
+name: Delete A Repository
+description: Request to delete an existing repository
+title: "[Delete Repository] Delete <Enter Repository Name>"
+labels:
+  - delete-repo
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Delete Repository
+
+        Use this issue to request deletion of an existing repository owned by this GitHub organization. After creating the issue, a member of the IssueOps approver team must add a comment with the `.approve` command. The workflow will delete the repository and comment on this issue with the result.
+
+        **Instructions**:
+        - Use the field below to provide the repository name.
+        - Once complete, enter a comment with the command `.submit`. This will submit the issue to the approval users.
+        - Only approved users can trigger the repository deletion.
+        - If approved, the approver will enter a comment with the command `.approve`. This will initiate the deletion of the repository.
+        - If denied, the approver will enter a comment with the command `.deny`. This will close the issue and comment that the request was denied.
+  - type: input
+    id: repo-name
+    attributes:
+      label: Repository Name
+      description: The name of the repository to be deleted
+      placeholder: Repository Name
+    validations:
+      required: true

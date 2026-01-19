@@ -1,0 +1,263 @@
+name: Add Team To Org - Approve Request
+
+on:
+  issue_comment:
+    types: [created]
+
+env:
+  APPROVER-GROUP: "issue-ops-approvers"
+  ISSUE_TEMPLATE_NAME: "add-team-to-org.yml"
+
+jobs:
+  approve:
+    name: Add Team To Org - Approve Request
+    runs-on: ubuntu-latest
+    
+    # This job should only be run when the following conditions are true:
+    #
+    # - A user comments `.approve` on the issue.
+    # - The issue has the `add-team-to-org` label.
+    # - The issue has the `validated` label.
+    # - The issue has the `submitted` label.
+    # - The issue does not have the `approved` or `denied` labels.
+    # - The issue is open.
+    if: github.event.comment.body != ''
+      && startsWith(github.event.comment.body, '.approve')
+      && contains(github.event.issue.labels.*.name, 'add-team-to-org')
+      && contains(github.event.issue.labels.*.name, 'validated')
+      && contains(github.event.issue.labels.*.name, 'submitted')
+      && !contains(github.event.issue.labels.*.name, 'approved')
+      && !contains(github.event.issue.labels.*.name, 'denied')
+      && github.event.issue.state == 'open'
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+          
+      # Set up Node.js for issue-ops actions (parser and validator)
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get GitHub App Token
+        id: token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
+          private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-issues: write                          #Used to parse the issue body, Assign Issue to Commenter, write comments and close the issue
+          permission-administration: write                  #Used to add the team to the repo
+          permission-members: write                         #Used to verify commentor is a member of the Approver Team and create new team in org
+
+      - name: Parse Issue Body
+        id: parse
+        uses: issue-ops/parser@v4
+        with:
+          body: ${{ github.event.issue.body }}
+          issue-form-template: ${{ env.ISSUE_TEMPLATE_NAME }}
+          workspace: ${{ github.workspace }}
+
+      - name: Verify Approver Is Not The Requestor
+        id: verify-not-requester
+        uses: lee-lott-actions/verify-approver-not-requester@v1
+        with:
+          requester: ${{ github.event.issue.user.login }}
+          approver: ${{ github.event.comment.user.login }}
+
+      # Step to verify comment author is a member of the issueops approver team.
+      - name: Check IssueOps Approver Membership
+        id: issueops-membership
+        uses: lee-lott-actions/verify-team-membership@v1
+        with:
+          user: ${{ github.event.comment.user.login }}
+          team-slug: ${{ env.APPROVER-GROUP }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+
+      # Step to assign issue to the comment author
+      - name: Assign Issue to Commenter
+        if: steps.verify-not-requester.outputs.is-approver-not-requester == 'true' 
+          && steps.issueops-membership.outputs.is-member == 'true'
+        id: assign-issue
+        uses: lee-lott-actions/assign-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          assignee: ${{ github.event.comment.user.login }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}
+
+      - name: Add Team To Org
+        if: >-
+          steps.verify-not-requester.outputs.is-approver-not-requester == 'true'
+          && steps.issueops-membership.outputs.is-member == 'true'
+          && steps.assign-issue.outputs.result == 'success'
+        id: add-team-to-org
+        uses: lee-lott-actions/add-team-to-org@v1
+        with:
+          team-name: ${{ fromJson(steps.parse.outputs.json)['team-name'] }}
+          team-description: ${{ fromJson(steps.parse.outputs.json)['team-description'] }}
+          owner: ${{ github.repository_owner }}
+          token: ${{ steps.token.outputs.token }}
+
+      - name: Comment on Issue with Result
+        if: always()
+        id: create-message
+        run: |
+          TEAM="${{ fromJson(steps.parse.outputs.json)['team-name'] }}"
+
+          if [ "${{ job.status }}" != "success" ]; then
+            MESSAGE="❌ Failed to add team $TEAM to organization. Check the workflow logs for details."            
+          elif [ "${{ steps.verify-not-requester.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to add team $TEAM to organization. ${{ steps.verify-not-requester.outputs.error-message }}"
+          elif [ "${{ steps.verify-not-requester.outputs.is-approver-not-requester }}" != "true" ]; then
+            MESSAGE="❌ Failed to add team $TEAM to organization. Approver cannot be the same person as the requester."
+          elif [ "${{ steps.issueops-membership.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to add team $TEAM to organization. ${{ steps.issueops-membership.outputs.error-message }}"
+          elif [ "${{ steps.issueops-membership.outputs.is-member }}" != "true" ]; then
+            MESSAGE="❌ Failed to add team $TEAM to organization.  Approver is not a member of the IssueOps Approvers team."
+          elif [ "${{ steps.assign-issue.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to add team $TEAM to organization. ${{ steps.assign-issue.outputs.error-message }}"
+          elif [ "${{ steps.add-team-to-org.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to add team $TEAM to organization. ${{ steps.add-team-to-org.outputs.error-message }}"
+          else
+            MESSAGE="✅ Successfully added team $TEAM to organization."
+          fi                
+          
+          echo "comment=$MESSAGE" >> $GITHUB_OUTPUT
+
+      - name: Post Comment        
+        if: always()
+        id: post-comment
+        uses: lee-lott-actions/post-issue-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          message: ${{ steps.create-message.outputs.comment }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}   
+          
+      - name: Add Approved Label
+        id: add-label
+        if: >-
+          success() &&
+          steps.verify-not-requester.outputs.is-approver-not-requester == 'true' &&
+          steps.issueops-membership.outputs.is-member == 'true' &&
+          steps.assign-issue.outputs.result == 'success' &&
+          steps.add-team-to-org.outputs.result == 'success'
+        uses: issue-ops/labeler@v2
+        with:
+          action: add
+          github_token: ${{ steps.token.outputs.token }}
+          labels: |
+            approved
+          issue_number: ${{ github.event.issue.number }}
+          repository: ${{ github.repository }}
+
+      - name: Close Issue
+        if: >-
+          success() &&
+          steps.verify-not-requester.outputs.is-approver-not-requester == 'true' &&
+          steps.issueops-membership.outputs.is-member == 'true' &&
+          steps.assign-issue.outputs.result == 'success' &&
+          steps.add-team-to-org.outputs.result == 'success'
+        uses: lee-lott-actions/close-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}
+  
+  get-matrix-action:
+      needs: approve
+      name: Grab Matrix
+      runs-on: ubuntu-latest
+      outputs:
+        matrix-value: ${{ steps.import-matrix.outputs.matrix }}
+        
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Get GitHub App Token
+          id: token
+          uses: actions/create-github-app-token@v2
+          with:
+            app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
+            private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
+            owner: ${{ github.repository_owner }}
+            permission-issues: write                          #Used to parse the issue body, Assign Issue to Commenter, write comments and close the issue
+            permission-administration: write                  #Used to add the team to the repo
+            permission-members: write                         #Used to verify commentor is a member of the Approver Team and create new team in org
+        
+        - name: Import Matrix
+          id: import-matrix
+          run: |
+            file="${{ github.workspace }}/.github/config/add-team-to-org-approval.json"
+            echo "matrix=$(jq -c '.' "$file")" >> "$GITHUB_OUTPUT"
+            echo "$GITHUB_OUTPUT"
+            
+  add-members:
+    needs: [approve, get-matrix-action]
+    name: Add Maintainer to New Team
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.get-matrix-action.outputs.matrix-value) }}
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Node.js for issue-ops actions (parser and validator)
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get GitHub App Token
+        id: token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
+          private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-issues: write                          #Used to parse the issue body, Assign Issue to Commenter, write comments and close the issue
+          permission-administration: write                  #Used to add the team to the repo
+          permission-members: write                         #Used to verify commentor is a member of the Approver Team and create new team in org
+
+      - name: Parse Issue Body
+        id: parse
+        uses: issue-ops/parser@v4
+        with:
+          body: ${{ github.event.issue.body }}
+          issue-form-template: ${{ env.ISSUE_TEMPLATE_NAME }}
+          workspace: ${{ github.workspace }}
+
+      - name: Slugify Team Name
+        id: slugify-team
+        uses: lee-lott-actions/slugify@v1
+        with:
+          input-string: ${{ fromJson(steps.parse.outputs.json)['team-name'] }}
+          
+      - name: Validate Team Exists
+        id: validate-team
+        uses: lee-lott-actions/verify-team-exists@v1
+        with:
+          team-name: ${{ steps.slugify-team.outputs.slug }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          
+      - name: Add Member To Team
+        if: steps.validate-team.outputs.team-exists == 'true'
+        id: add-members-to-team
+        uses: lee-lott-actions/add-member-to-team@v1
+        with:
+          member-name: ${{ matrix.name }}
+          team-name: ${{ steps.slugify-team.outputs.slug }}
+          role: ${{ matrix.role }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}

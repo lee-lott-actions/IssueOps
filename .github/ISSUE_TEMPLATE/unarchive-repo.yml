@@ -1,0 +1,35 @@
+name: Unarchive A Repository
+description: Request to unarchive an existing repository
+title: "[Unarchive Repository] <Enter Repository Name>"
+labels:
+  - unarchive-repo
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Unarchive Repository
+
+        Use this issue to request unarchiving of an existing repository owned by this GitHub organization. After creating the issue, a member of the IssueOps approver team must add a comment with the `.approve` command. The workflow will unarchive the repository and comment on this issue with the result.
+
+        **Instructions**:
+        - Use the fields below to specify the repository details.
+        - Once complete, enter a comment with the command `.submit`. This will submit the issue to the approval users.
+        - Only approved users can trigger the repository unarchiving.
+        - If approved, the approver will enter a comment with the command `.approve`. This will initiate the unarchiving of the repository.
+        - If denied, the approver will enter a comment with the command `.deny`. This will close the issue and enter a comment that the request was denied.
+  - type: input
+    id: repo-name
+    attributes:
+      label: Repository Name
+      description: The name of the repository you would like to unarchive
+      placeholder: Repository Name
+    validations:
+      required: true
+  - type: textarea
+    id: unarchive-reason
+    attributes:
+      label: Reason For Unarchiving
+      description: Provide a brief explanation for why this repository should be unarchived
+      placeholder: e.g., Project is being resumed, or repository needs to be reactivated for updates
+    validations:
+      required: true

@@ -1,0 +1,45 @@
+name: Update Member In Team
+description: Request updating the role of a member in an existing team
+title: "[Update Member In Team] Update <Enter User Name> in <Enter Team Name>"
+labels:
+  - update-member-in-team
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Update Member in Team
+
+        Use this issue to request updating a member's role in an existing team owned by this GitHub organization. After creating the issue, a member of the IssueOps approver team must add a comment with the `.approve` command. The workflow will update the member's role in the team and comment on this issue with the result.
+
+        **Instructions**:
+        - Use the fields below to provide the member and team details, and the new role.
+        - Once complete, enter a comment with the command `.submit`. This will submit the issue to the approval users.
+        - Only approved users can trigger the role update.
+        - If approved, the approver will enter a comment with the command `.approve`. This will initiate the role update for the member in the team.
+        - If denied, the approver will enter a comment with the command `.deny`. This will close the issue and comment that the request was denied.
+  - type: input
+    id: member-name
+    attributes:
+      label: Member Name
+      description: The GitHub username of the member whose role will be updated
+      placeholder: GitHub Member
+    validations:
+      required: true
+  - type: input
+    id: team-name
+    attributes:
+      label: Team Name
+      description: The name of the existing team in which the member's role will be updated
+      placeholder: Team Name
+    validations:
+      required: true
+  - type: dropdown
+    id: team-role
+    attributes:
+      label: New Team Role
+      description: The new role the user will have in the team
+      options:
+        - Member
+        - Maintainer
+    validations:
+      required: true

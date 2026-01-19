@@ -1,0 +1,17 @@
+validators:
+  - field: member-name
+    script: no-special-characters.js
+  - field: team-name
+    script: no-special-characters.js
+  - field: repo-name
+    script: no-special-characters.js
+  - field: repo-description
+    script: no-special-characters.js
+  - field: template-repo
+    script: no-special-characters.js
+  - field: team-description
+    script: no-special-characters.js
+  - field: current-repo-name
+    script: no-special-characters.js
+  - field: new-repo-name
+    script: no-special-characters.js

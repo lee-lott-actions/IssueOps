@@ -1,0 +1,49 @@
+name: Add Team to Repository
+description: Request adding a team to an existing repository with a specified role
+title: "[Add Team To Repo] Add <Enter Team Name> to <Enter Repository Name>"
+labels:
+  - add-team-to-repo
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add Team to Repository
+
+        Use this issue to request adding a team to an existing repository owned by this GitHub organization. After creating the issue, a member of the IssueOps approver team must add a comment with the `.approve` command. The workflow will add the team to the repository with the specified role and comment on this issue with the result.
+
+        **Instructions**:
+        - Use the fields below to provide the team and repository details.
+        - Once complete, enter a comment with the command `.submit`. This will submit the issue to the approval users.
+        - Only approved users can trigger the team addition.
+        - If approved, the approver will enter a comment with the command `.approve`. This will initiate the addition of the team to the repository.
+        - If denied, the approver will enter a comment with the command `.deny`. This will close the issue and comment that the request was denied.
+  - type: input
+    id: team-name
+    attributes:
+      label: Team Name
+      description: The name of the team to be added to the repository
+      placeholder: Team Name
+    validations:
+      required: true
+  - type: input
+    id: repo-name
+    attributes:
+      label: Repository Name
+      description: The name of the existing repository to which the team should be added
+      placeholder: Repository Name
+    validations:
+      required: true
+  - type: dropdown
+    id: team-role
+    attributes:
+      label: Team Role
+      description: The role the team will have on the repository
+      options:
+        - Read
+        - Triage
+        - Write
+        - Maintain
+        - Admin
+        - Custom Maintainers
+    validations:
+      required: true

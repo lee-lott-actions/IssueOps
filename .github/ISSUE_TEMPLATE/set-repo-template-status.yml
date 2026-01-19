@@ -1,0 +1,37 @@
+name: Set Repository Template Status
+description: Request to update repository template status
+title: "[Set Repository Template Status] <Enter Repository Name>"
+labels:
+  - set-repo-template-status
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Set Repository Template Status
+
+        Use this issue to request a repository's template repository status update for this GitHub organization. After creating the issue, a member of the IssueOps approver team must add a comment with the `.approve` command. The workflow will create the repository, add a `development` branch, and comment on this issue with the result.
+
+        **Instructions**:
+        - Use the fields below to draft the repository details.
+        - Once complete, enter a comment with the command '.submit'.  This will submit the issue to the approval users.
+        - Only approved users can trigger the repository creation.
+        - If approved, the approver will enter a comment with the command '.approve'.  This will initiate the creation of the new repository.
+        - If denied, the approver will enter a comment with the command '.deny'.  This will close the issue and enter a comment that the request was denied.
+  - type: input
+    id: repo-name
+    attributes:
+      label: Repository Name
+      description: The name of the repository
+      placeholder: Repository Name
+    validations:
+      required: true
+  - type: dropdown
+    id: is-template
+    attributes:
+      label: Is Repository a Template Repository
+      description: Should the repository be set as a template repository?
+      options:
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true

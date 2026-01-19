@@ -1,0 +1,200 @@
+name: Add Member To Team - Approve Request
+
+on:
+  issue_comment:
+    types: [created]
+
+env:
+  APPROVER-GROUP: "issue-ops-approvers"
+  ISSUE_TEMPLATE_NAME: "add-member-to-team.yml"
+
+jobs:
+  approve:
+    name: Add Member To Team - Approve Request
+    runs-on: ubuntu-latest
+
+    # This job should only be run when the following conditions are true:
+    #
+    # - A user comments `.approve` on the issue.
+    # - The issue has the `add-member-to-team` label.
+    # - The issue has the `validated` label.
+    # - The issue has the `submitted` label.
+    # - The issue does not have the `approved` or `denied` labels.
+    # - The issue is open.
+    if: github.event.comment.body != ''
+      && startsWith(github.event.comment.body, '.approve')
+      && contains(github.event.issue.labels.*.name, 'add-member-to-team')
+      && contains(github.event.issue.labels.*.name, 'validated')
+      && contains(github.event.issue.labels.*.name, 'submitted')
+      && !contains(github.event.issue.labels.*.name, 'approved')
+      && !contains(github.event.issue.labels.*.name, 'denied')
+      && github.event.issue.state == 'open'
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Node.js for issue-ops actions (parser and validator)
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get GitHub App Token
+        id: token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
+          private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-issues: write                          #Used to parse the issue body, Assign Issue to Commenter, write comments and close the issue
+          permission-administration: write                  #Used to add the team to the repo
+          permission-members: write                         #Used to verify commentor is a member of the Approver Team
+
+      - name: Parse Issue Body
+        id: parse
+        uses: issue-ops/parser@v4
+        with:
+          body: ${{ github.event.issue.body }}
+          issue-form-template: ${{ env.ISSUE_TEMPLATE_NAME }}
+          workspace: ${{ github.workspace }}      
+      
+      - name: Verify Approver Is Not The Requestor
+        id: verify-not-requester
+        uses: lee-lott-actions/verify-approver-not-requester@v1
+        with:
+          requester: ${{ github.event.issue.user.login }}
+          approver: ${{ github.event.comment.user.login }}
+
+      # Step to verify comment author is a member of the issueops approver team.
+      - name: Check IssueOps Approver Membership
+        id: issueops-membership
+        uses: lee-lott-actions/verify-team-membership@v1
+        with:
+          user: ${{ github.event.comment.user.login }}
+          team-slug: ${{ env.APPROVER-GROUP }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+
+      # Step to assign issue to the comment author
+      - name: Assign Issue to Commenter
+        if: steps.verify-not-requester.outputs.is-approver-not-requester == 'true' && steps.issueops-membership.outputs.is-member == 'true'
+        id: assign-issue
+        uses: lee-lott-actions/assign-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          assignee: ${{ github.event.comment.user.login }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}
+
+      - name: Slugify Team Name
+        if: steps.verify-not-requester.outputs.is-approver-not-requester == 'true'
+          && steps.issueops-membership.outputs.is-member == 'true'
+          && steps.assign-issue.outputs.result == 'success'
+        id: slugify-team
+        uses: lee-lott-actions/slugify@v1
+        with:
+          input-string: ${{ fromJson(steps.parse.outputs.json)['team-name'] }}
+
+      - name: Slugify Member Name
+        if: steps.verify-not-requester.outputs.is-approver-not-requester == 'true'
+          && steps.issueops-membership.outputs.is-member == 'true'
+          && steps.assign-issue.outputs.result == 'success'
+        id: slugify-member
+        uses: lee-lott-actions/slugify@v1
+        with:
+          input-string: ${{ fromJson(steps.parse.outputs.json)['member-name'] }}
+          
+      - name: Add Member To Team
+        if: steps.verify-not-requester.outputs.is-approver-not-requester == 'true'
+          && steps.issueops-membership.outputs.is-member == 'true'
+          && steps.assign-issue.outputs.result == 'success'
+          && steps.slugify-team.outputs.result == 'success'
+          && steps.slugify-member.outputs.result == 'success'
+        id: add-member-to-team
+        uses: lee-lott-actions/add-member-to-team@v1
+        with:
+          member-name: ${{ steps.slugify-member.outputs.slug }}
+          team-name: ${{ steps.slugify-team.outputs.slug }}
+          role: ${{ fromJson(steps.parse.outputs.json)['team-role'][0] }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Create Comment Message
+        if: always()
+        id: create-message
+        run: |
+          TEAM="${{ fromJson(steps.parse.outputs.json)['team-name'] }}"
+          MEMBER="${{ fromJson(steps.parse.outputs.json)['member-name'] }}"
+          
+          if [ "${{ job.status }}" != "success" ]; then
+            MESSAGE="❌ Failed to add member $MEMBER to team $TEAM. Check the workflow logs for details."
+          elif [ "${{ steps.verify-not-requester.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to add member $MEMBER to team $TEAM. ${{ steps.verify-not-requester.outputs.error-message }}"
+          elif [ "${{ steps.verify-not-requester.outputs.is-approver-not-requester }}" != "true" ]; then
+            MESSAGE="❌ Failed to add member $MEMBER to team $TEAM. Approver cannot be the same person as the requester."
+          elif [ "${{ steps.issueops-membership.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to add member $MEMBER to team $TEAM. ${{ steps.issueops-membership.outputs.error-message }}"
+          elif [ "${{ steps.issueops-membership.outputs.is-member }}" != "true" ]; then
+            MESSAGE="❌ Failed to add member $MEMBER to team $TEAM.  Approver is not a member of the IssueOps Approvers team."
+          elif [ "${{ steps.assign-issue.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to add member $MEMBER to team $TEAM ${{ steps.assign-issue.outputs.error-message }}"
+          elif [ "${{ steps.slugify-team.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to slugify team $TEAM ${{ steps.slugify-team.outputs.error-message }}"
+          elif [ "${{ steps.slugify-member.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to slugify member $MEMBER ${{ steps.slugify-member.outputs.error-message }}"            
+          elif [ "${{ steps.add-member-to-team.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to add member $MEMBER to team $TEAM. ${{ steps.add-member-to-team.outputs.error-message }}"
+          else
+            MESSAGE="✅ Successfully added member $MEMBER to team $TEAM"
+          fi
+          
+          echo "comment=$MESSAGE" >> $GITHUB_OUTPUT
+
+      - name: Post Comment        
+        if: always()
+        id: post-comment
+        uses: lee-lott-actions/post-issue-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          message: ${{ steps.create-message.outputs.comment }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}              
+
+      - name: Add Approved Label
+        id: add-label
+        if: >-
+          success()
+          && steps.verify-not-requester.outputs.is-approver-not-requester == 'true'
+          && steps.issueops-membership.outputs.is-member == 'true'
+          && steps.assign-issue.outputs.result == 'success'
+          && steps.slugify-team.outputs.result == 'success'
+          && steps.slugify-member.outputs.result == 'success'
+          && steps.add-member-to-team.outputs.result == 'success'
+        uses: issue-ops/labeler@v2
+        with:
+          action: add
+          github_token: ${{ steps.token.outputs.token }}
+          labels: |
+            approved
+          issue_number: ${{ github.event.issue.number }}
+          repository: ${{ github.repository }}
+
+      - name: Close Issue
+        if: >-
+          success()
+          && steps.verify-not-requester.outputs.is-approver-not-requester == 'true'
+          && steps.issueops-membership.outputs.is-member == 'true'
+          && steps.assign-issue.outputs.result == 'success'
+          && steps.slugify-team.outputs.result == 'success'
+          && steps.slugify-member.outputs.result == 'success'
+          && steps.add-member-to-team.outputs.result == 'success'
+        uses: lee-lott-actions/close-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}

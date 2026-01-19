@@ -1,0 +1,35 @@
+name: Rename A Repository
+description: Request to rename an existing repository
+title: "[Rename Repository] Rename <Enter Current Repository Name> to <Enter New Repository Name>"
+labels:
+  - rename-repo
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Rename Repository
+
+        Use this issue to request renaming an existing repository owned by this GitHub organization. After creating the issue, a member of the IssueOps approver team must add a comment with the `.approve` command. The workflow will rename the repository and comment on this issue with the result.
+
+        **Instructions**:
+        - Use the fields below to provide the current and new repository names.
+        - Once complete, enter a comment with the command `.submit`. This will submit the issue to the approval users.
+        - Only approved users can trigger the repository rename.
+        - If approved, the approver will enter a comment with the command `.approve`. This will initiate the renaming of the repository.
+        - If denied, the approver will enter a comment with the command `.deny`. This will close the issue and comment that the request was denied.
+  - type: input
+    id: current-repo-name
+    attributes:
+      label: Current Repository Name
+      description: The current name of the repository to be renamed
+      placeholder: Current Repository Name
+    validations:
+      required: true
+  - type: input
+    id: new-repo-name
+    attributes:
+      label: New Repository Name
+      description: The new name for the repository
+      placeholder: New Repository Name
+    validations:
+      required: true

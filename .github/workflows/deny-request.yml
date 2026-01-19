@@ -1,0 +1,126 @@
+name: Deny Request
+
+on:
+  issue_comment:
+    types: [created]
+
+env:
+  APPROVER-GROUP: "issue-ops-approvers"
+  
+jobs:
+  deny:
+    name: Deny Request
+    runs-on: ubuntu-latest
+
+    # This job should only be run when the following conditions are true:
+    #
+    # - A user comments `.deny` on the issue.
+    # - The issue has the `validated` label.
+    # - The issue has the `submitted` label.
+    # - The issue does not have the `approved` or `denied` labels.
+    # - The issue is open.
+    if: github.event.comment.body != ''
+      && startsWith(github.event.comment.body, '.deny')
+      && contains(github.event.issue.labels.*.name, 'validated') == true
+      && contains(github.event.issue.labels.*.name, 'submitted') == true
+      && contains(github.event.issue.labels.*.name, 'approved') == false
+      && contains(github.event.issue.labels.*.name, 'denied') == false
+      && github.event.issue.state == 'open'
+          
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Node.js for issue-ops actions (parser and validator)
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get GitHub App Token
+        id: token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
+          private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.repository_name }}
+          permission-issues: write
+          permission-members: read
+
+      - name: Check IssueOps Approver Membership
+        id: issueops-membership
+        uses: lee-lott-actions/verify-team-membership@v1
+        with:
+          user: ${{ github.event.comment.user.login }}
+          team-slug: ${{ env.APPROVER-GROUP }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+               
+      - name: Assign Issue to Commenter
+        if: steps.issueops-membership.outputs.is-member == 'true'
+        id: assign-issue
+        uses: lee-lott-actions/assign-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          assignee: ${{ github.event.comment.user.login }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}          
+
+      - name: Create Comment Message
+        if: always()
+        id: create-message
+        run: |
+          if [ "${{ job.status }}" != "success" ]; then
+            MESSAGE="❌ ${{ 'Failed to deny request. Check the workflow logs for details.' }}"
+          elif [ "${{ steps.issueops-membership.outputs.is-member }}" != "true" ]; then
+            MESSAGE="❌ ${{ steps.issueops-membership.outputs.error-message }}"
+          elif [ "${{ steps.assign-issue.outputs.result }}"  != "success" ]; then
+            MESSAGE="❌ ${{ steps.assign-issue.outputs.error-message }}"
+          else
+            MESSAGE="Request Denied."
+          fi
+
+          echo "comment=$MESSAGE" >> $GITHUB_OUTPUT
+
+      - name: Post Comment        
+        if: always()
+        id: post-comment
+        uses: lee-lott-actions/post-issue-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          message: ${{ steps.create-message.outputs.comment }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}
+          
+      - name: Add Denied Label      
+        id: add-label
+        if: >-
+          success()
+          && steps.issueops-membership.outputs.is-member == 'true'
+          && steps.assign-issue.outputs.result == 'success'
+          && steps.post-comment.outputs.result == 'success'
+        uses: issue-ops/labeler@v2
+        with:
+          action: add
+          github_token: ${{ steps.token.outputs.token }}
+          labels: |
+            denied
+          issue_number: ${{ github.event.issue.number }}
+          repository: ${{ github.repository }}
+          
+      - name: Close Issue
+        if: >-
+          success()
+          && steps.issueops-membership.outputs.is-member == 'true'
+          && steps.assign-issue.outputs.result == 'success'
+          && steps.post-comment.outputs.result == 'success'
+        uses: lee-lott-actions/close-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}

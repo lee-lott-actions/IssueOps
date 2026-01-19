@@ -1,0 +1,155 @@
+name: Add Repo To Org - Validate Request
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+  issue_comment:
+    types: [created]
+
+env:
+  ISSUE_TEMPLATE_NAME: "add-repo-to-org.yml"
+  
+jobs:
+  validate:
+    name: Add Repo To Org - Validate Request
+    runs-on: ubuntu-latest
+    if: ${{ (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'add-repo-to-org')) 
+      || (github.event_name == 'issue_comment' && contains(github.event.issue.labels.*.name, 'add-repo-to-org') && contains(github.event.comment.body, '.validate')) }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v5
+        
+      # Set up Node.js for issue-ops actions (parser and validator)
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get GitHub App Token
+        id: token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
+          private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.repository_name }}
+          permission-issues: write
+
+      # Remove existing labels to start fresh
+      - name: Remove Labels
+        id: remove-label
+        uses: issue-ops/labeler@v2
+        with:
+          action: remove
+          github_token: ${{ steps.token.outputs.token }}
+          labels: |
+            validated
+            approved
+            denied
+            submitted
+          issue_number: ${{ github.event.issue.number }}
+          repository: ${{ github.repository }}
+
+      - name: ReOpen Issue If Closed
+        if: ${{ github.event.issue.state == 'closed'}}
+        id: reopen-issue
+        uses: lee-lott-actions/open-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}
+
+      - name: Parse Issue Body
+        id: parse
+        uses: issue-ops/parser@v4
+        with:
+          body: ${{ github.event.issue.body }}
+          issue-form-template: ${{ env.ISSUE_TEMPLATE_NAME }}
+          workspace: ${{ github.workspace }}
+
+      - name: Validate Request
+        id: validate
+        uses: issue-ops/validator@v3
+        with:
+          add-comment: false
+          github-token: ${{ steps.token.outputs.token }}
+          issue-form-template: ${{ env.ISSUE_TEMPLATE_NAME }}
+          issue-number: ${{ github.event.issue.number }}
+          parsed-issue-body: ${{ steps.parse.outputs.json }}
+          workspace: ${{ github.workspace }}
+
+      # Validate the new repo name is not in use
+      - name: Validate Repo Exists
+        if: ${{ steps.validate.outputs.result == 'success' }}
+        id: validate-repo
+        uses: lee-lott-actions/verify-repo-exists@v1
+        with:
+          repo-name: ${{ fromJson(steps.parse.outputs.json)['repo-name'] }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}   
+
+      # Validate the template repo exists
+      - name: Validate Template Repo Exists
+        if: ${{ steps.validate.outputs.result == 'success' }}
+        id: validate-template
+        uses: lee-lott-actions/verify-repo-exists@v1
+        with:
+          repo-name: ${{ fromJson(steps.parse.outputs.json)['template-repo'] }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}   
+
+      # Enter Comment with the results of the validation process.
+      - name: Comment on Validation Result
+        if: always()
+        id: create-message
+        run: |
+          if [ "${{ job.status }}" != "success" ]; then
+            MESSAGE="❌ Failed to validate request to add repository to organization. Check the workflow logs for details."
+          elif [ "${{ steps.validate.outputs.result }}" != "success" ]; then
+            MESSAGE="❌ Failed to validate request to add repository to organization. Error: Invalid issue form data. Check required fields. Verify disallowed characters are not present: $, #, *, &, %, double quote, backslash, backtick, forward slash, single quote."
+          elif [ "${{ steps.validate-repo.outputs.repo-exists }}" == "true" ]; then
+            MESSAGE="❌ Failed to validate request to add repository to organization. Error: Repository already exists."
+          elif [ "${{ steps.validate-template.outputs.repo-exists }}" != "true" ]; then
+            MESSAGE="❌ Failed to validate request to add repository to organization. Error: Template Repository does not exists."
+          elif [ "${{ steps.validate-template.outputs.is-template-repo }}" != "true" ]; then
+            MESSAGE="❌ Failed to validate request to add repository to organization. Error: Template Repository is not an actual template repository."
+          else
+            MESSAGE="✅ Successfully validated request to add repository to organization. Please comment with '.submit' to proceed."
+          fi
+          
+          echo "comment=$MESSAGE" >> $GITHUB_OUTPUT
+
+      - name: Post Comment        
+        if: always()
+        id: post-comment
+        uses: lee-lott-actions/post-issue-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          message: ${{ steps.create-message.outputs.comment }}
+          token: ${{ steps.token.outputs.token }}
+          owner: ${{ github.repository_owner }}
+          repo-name: ${{ github.event.repository.name }}
+          
+      # Add 'validated' label if validation succeeds
+      - if: >-
+          job.status == 'success'
+          && steps.validate.outputs.result == 'success'
+          && steps.validate-template.outputs.repo-exists == 'true'
+          && steps.validate-template.outputs.is-template-repo == 'true'
+          && steps.validate-repo.outputs.repo-exists == 'false'
+        name: Add Validated Label
+        id: add-label
+        uses: issue-ops/labeler@v2
+        with:
+          action: add
+          github_token: ${{ steps.token.outputs.token }}
+          labels: |
+            validated
+          issue_number: ${{ github.event.issue.number }}
+          repository: ${{ github.repository }}

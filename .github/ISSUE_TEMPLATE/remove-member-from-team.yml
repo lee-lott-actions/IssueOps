@@ -1,0 +1,35 @@
+name: Remove Member from Team
+description: Request removing a member from an existing team
+title: "[Remove Member From Team] Remove <Enter User Name> from <Enter Team Name>"
+labels:
+  - remove-member-from-team
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Remove Member from Team
+
+        Use this issue to request removing a member from an existing team owned by this GitHub organization. After creating the issue, a member of the IssueOps approver team must add a comment with the `.approve` command. The workflow will remove the member from the team and comment on this issue with the result.
+
+        **Instructions**:
+        - Use the fields below to provide the member and team details.
+        - Once complete, enter a comment with the command `.submit`. This will submit the issue to the approval users.
+        - Only approved users can trigger the member removal.
+        - If approved, the approver will enter a comment with the command `.approve`. This will initiate the removal of the member from the team.
+        - If denied, the approver will enter a comment with the command `.deny`. This will close the issue and comment that the request was denied.
+  - type: input
+    id: member-name
+    attributes:
+      label: Member Name
+      description: The GitHub username of the member to be removed from the team
+      placeholder: GitHub Member
+    validations:
+      required: true
+  - type: input
+    id: team-name
+    attributes:
+      label: Team Name
+      description: The name of the existing team from which the user should be removed
+      placeholder: Team Name
+    validations:
+      required: true
