@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get GitHub App Token
         id: token
@@ -64,7 +64,7 @@ jobs:
       - name: Add Submitted Label
         if: ${{ steps.post-comment.outputs.result == 'success' }}
         id: add-label
-        uses: issue-ops/labeler@v2
+        uses: issue-ops/labeler@v4
         with:
           action: add
           github_token: ${{ steps.token.outputs.token }}

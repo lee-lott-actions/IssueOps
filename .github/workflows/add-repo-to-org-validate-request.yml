@@ -21,12 +21,12 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         
       # Set up Node.js for issue-ops actions (parser and validator)
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
@@ -43,7 +43,7 @@ jobs:
       # Remove existing labels to start fresh
       - name: Remove Labels
         id: remove-label
-        uses: issue-ops/labeler@v2
+        uses: issue-ops/labeler@v4
         with:
           action: remove
           github_token: ${{ steps.token.outputs.token }}
@@ -67,7 +67,7 @@ jobs:
 
       - name: Parse Issue Body
         id: parse
-        uses: issue-ops/parser@v4
+        uses: issue-ops/parser@v5
         with:
           body: ${{ github.event.issue.body }}
           issue-form-template: ${{ env.ISSUE_TEMPLATE_NAME }}
@@ -75,7 +75,7 @@ jobs:
 
       - name: Validate Request
         id: validate
-        uses: issue-ops/validator@v3
+        uses: issue-ops/validator@v4
         with:
           add-comment: false
           github-token: ${{ steps.token.outputs.token }}
@@ -145,7 +145,7 @@ jobs:
           && steps.validate-repo.outputs.repo-exists == 'false'
         name: Add Validated Label
         id: add-label
-        uses: issue-ops/labeler@v2
+        uses: issue-ops/labeler@v4
         with:
           action: add
           github_token: ${{ steps.token.outputs.token }}

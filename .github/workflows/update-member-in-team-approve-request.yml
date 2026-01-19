@@ -32,12 +32,12 @@ jobs:
       
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Set up Node.js for issue-ops actions (parser and validator)
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
@@ -54,7 +54,7 @@ jobs:
 
       - name: Parse Issue Body
         id: parse
-        uses: issue-ops/parser@v4
+        uses: issue-ops/parser@v5
         with:
           body: ${{ github.event.issue.body }}
           issue-form-template: ${{ env.ISSUE_TEMPLATE_NAME }}
@@ -174,7 +174,7 @@ jobs:
           && steps.slugify-team.outputs.result == 'success'
           && steps.slugify-member.outputs.result == 'success'
           && steps.update-member-in-team.outputs.result == 'success'
-        uses: issue-ops/labeler@v2
+        uses: issue-ops/labeler@v4
         with:
           action: add
           github_token: ${{ steps.token.outputs.token }}
