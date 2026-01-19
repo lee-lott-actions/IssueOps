@@ -12,7 +12,7 @@ Please complete the following steps after cloning to your organization:
 
 1. Verify there is a team called `issue-ops-admins` in the organization. Create the team if it does not exist.  Add the necessary staff to the team.
 2. Verify there is a team called `issue-ops-approvers` in the organization. Create the team if it does not exist.  Add the necessary staff to the team.
-3. Go the the add-team-to-org-approve-request.yml in the `.github/workflows` folder.  Update the `add-members` job maintainer matrix with member names who would be maintainers for the new team.
+3. Under `.github/config` folder, update the `add-repo-to-rog-approval.json` and the `add-team-to-org-approval.json`.  Add the necessary teams and staff as needed.
 4. In each .md file in the docs folder, update the link to the IssueOps Approvers Team with the correct organization name.
 5. Create a repository variable, `ISSUEOPSBOT_APP_ID`.  Assign it the APP ID of the IssueOps GitHub App.
 6. Create a repository secret, `ISSUEOPSBOT_APP_PRIVATE_KEY`.  Assign it the private key of the IssueOps GitHub App.
