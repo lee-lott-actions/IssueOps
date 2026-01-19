@@ -29,12 +29,12 @@ jobs:
           
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Set up Node.js for issue-ops actions (parser and validator)
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
@@ -103,7 +103,7 @@ jobs:
           && steps.issueops-membership.outputs.is-member == 'true'
           && steps.assign-issue.outputs.result == 'success'
           && steps.post-comment.outputs.result == 'success'
-        uses: issue-ops/labeler@v2
+        uses: issue-ops/labeler@v4
         with:
           action: add
           github_token: ${{ steps.token.outputs.token }}
