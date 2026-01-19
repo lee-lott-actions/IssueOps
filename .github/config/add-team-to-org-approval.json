@@ -1,3 +1,12 @@
 {
-  "include": []
+	"include": [
+	{
+		"name": "lee-lott",
+		"role": "member"
+	},
+	{
+		"name": "llott9264",
+		"role": "memeber"
+	},
+	]
 }
