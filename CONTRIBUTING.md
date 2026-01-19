@@ -38,12 +38,21 @@ Please complete the following steps after cloning to your organization:
     - delete-repo
          - This label is applied to any new request to delete a repository from the organization.
          -  #0052cc
+    - remove-member-from-team
+         - This label is applied to any new request to remvoe a member from a team within the organziation.
+         - #0052cc
     - rename-repo
          - This label is applied to any new request to rename a repository within the organization.
          -  #0052cc
+    - set-repo-template-status
+         - This label is applied to any new request to rename a repository within the organization.
+         - #0052cc
     - unarchive-repo
          - This label is applied to any new request to unarchive a repository within the organization.
          -  #0052cc
+    - update-member-in-team
+         - This label is applied to any new request to update a new member in a team within the organization.
+         - #0052cc
     - approved
          - This label is applied the issue is approved by the IssueOps Approver team.
          -  #0e8a16
