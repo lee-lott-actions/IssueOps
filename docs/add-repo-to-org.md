@@ -5,7 +5,7 @@
 1. In the navigation menu at the top of the page, navigate to the **Issues** tab.
 <img width="892" height="61" alt="image" src="https://github.com/user-attachments/assets/376f5d9d-80bf-4765-ad12-44eb570e5f28" />
 2. Click **New Issue**.
-![image](https://github.com/user-attachments/assets/a14ab8a9-f912-486a-ad32-016c012371c0)
+<img width="1268" height="57" alt="image" src="https://github.com/user-attachments/assets/83b67a95-5ad7-40b8-a618-4909a58d6e43" />
 3. Select the `Add Repository To Organization` template.
 ![image](https://github.com/user-attachments/assets/039e7927-43c6-41c4-8cd0-20fb1f43d8f4)
 4. Fill out the template with the required details.
