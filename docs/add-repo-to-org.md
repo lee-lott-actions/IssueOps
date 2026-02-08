@@ -18,7 +18,7 @@
 6. Click **Create**.
 7. The Issue will now be created.  Upon creation, a GitHub Action will run to validate the fields.  It may take a few moments for the validation to complete.
     - If correct, a comment will be provided with instructions on how to submit the issue for review. Also, a validated label will be added to the issue.
-      ![image](https://github.com/user-attachments/assets/d3d86dea-73ba-4692-8435-c5b8a2281fb7)
+      ![image](https://github.com/user-attachments/assets/a96b1d8e-a57a-40a9-be75-158ad2cbb6f3)
     - If it fails, a comment will be provided with information as to the cause of the problem.  The problem must be resolved in order to proceed with the process.  In the example below, the `.github` repository is not a valid template repository.
       ![image](https://github.com/user-attachments/assets/d0c6eee8-9c0c-41d5-88e9-91d755e0b3d1)
        - If the problem is with any of the required fields, please update them.  Upon saving, the Issue wil be re-validated automatically.
