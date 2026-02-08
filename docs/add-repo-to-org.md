@@ -7,8 +7,8 @@
 2. Click **New Issue**.
 ![image](https://github.com/user-attachments/assets/83b67a95-5ad7-40b8-a618-4909a58d6e43)
 3. Select the `Add Repository To Organization` template.
-<img width="801" height="375" alt="image" src="https://github.com/user-attachments/assets/95c09a6e-aea1-4fd4-a3ab-70990d23a271" />
-5. Fill out the template with the required details.
+![image](https://github.com/user-attachments/assets/95c09a6e-aea1-4fd4-a3ab-70990d23a271)
+4. Fill out the template with the required details.
    - Title - Replace `<Enter Repository Name>` with the name of the new repository.
    - Repository Name - Provide the name of the new repository.
    - Repository Description - Provide a brief description as to the purpose of the new repository.
