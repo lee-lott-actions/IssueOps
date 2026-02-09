@@ -20,7 +20,7 @@
     - If correct, a comment will be provided with instructions on how to submit the issue for review. Also, a validated label will be added to the issue.
       
       ![image](https://github.com/user-attachments/assets/15d6604c-67dd-449d-bfdc-eba9780a1525)
-    - If it fails, a comment will be provided with information as to the cause of the problem.  The problem must be resolved in order to proceed with the process.  In the example below, the `.github` repository is not a valid template repository.
+    - If it fails, a comment will be provided with information as to the cause of the problem.  The problem must be resolved in order to proceed with the process.  In the example below, the repository is not a valid template repository.
       ![image](https://github.com/user-attachments/assets/e6dbf352-3ffb-4c4f-a5ee-266d5c007f18)
        - If the problem is with any of the required fields, please update them.  Upon saving, the Issue wil be re-validated automatically.
        - If the problem lies elsewhere and upon resolving the problem, please enter a new comment with the command `.validate`.  This will re-validate the Issue.
