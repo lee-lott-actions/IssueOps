@@ -34,5 +34,5 @@
     
     ![image](https://github.com/user-attachments/assets/7ff394a2-7059-49b0-a267-e0a2404c0c9d)
     - If denied,  a comment will be added to the Issue noting the request was denied.  The Issue will be closed and a `denied` label will be added to the Issue.  The [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) may provide reasons for the denial.  Be sure to look for comments that may have been provided.
-    ![image](https://github.com/user-attachments/assets/7f2d3c5b-f324-429f-8bf5-03a96db3bd86)
+    ![image](https://github.com/user-attachments/assets/57c66365-49fe-4e90-95f4-2d489a42e70b)
 12. Regardless of the result, the `Add Repository To Organization` request is now complete.
