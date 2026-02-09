@@ -14,7 +14,7 @@
    - Repository Description - Provide a brief description as to the purpose of the new repository.
    - Template Repository - Provide the name of the repository on which to base the new repository.
    - Is Repository a Template Repository? - Select Yes/No to mark the repository as a template repository.
-![image](https://github.com/user-attachments/assets/216c29fc-e5fd-4860-a620-d9aa2a7ea50e)
+![image](https://github.com/user-attachments/assets/bc99d904-ffa5-4654-8d86-9d03eb8894e7)
 5. Click **Create**.
 6. The Issue will now be created.  Upon creation, a GitHub Action will run to validate the fields.  It may take a few moments for the validation to complete.
     - If correct, a comment will be provided with instructions on how to submit the issue for review. Also, a validated label will be added to the issue.
