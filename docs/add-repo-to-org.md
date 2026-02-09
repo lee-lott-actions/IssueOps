@@ -21,12 +21,12 @@
       
       ![image](https://github.com/user-attachments/assets/15d6604c-67dd-449d-bfdc-eba9780a1525)
     - If it fails, a comment will be provided with information as to the cause of the problem.  The problem must be resolved in order to proceed with the process.  In the example below, the `.github` repository is not a valid template repository.
-      ![image](https://github.com/user-attachments/assets/d0c6eee8-9c0c-41d5-88e9-91d755e0b3d1)
+      ![image](https://github.com/user-attachments/assets/e6dbf352-3ffb-4c4f-a5ee-266d5c007f18)
        - If the problem is with any of the required fields, please update them.  Upon saving, the Issue wil be re-validated automatically.
        - If the problem lies elsewhere and upon resolving the problem, please enter a new comment with the command `.validate`.  This will re-validate the Issue.
-7. Once the Issue has been validated and is ready to be submitted for review, enter a new comment in the Issue with the message `.submit`.  Then, click the `Comment` button.   
+8. Once the Issue has been validated and is ready to be submitted for review, enter a new comment in the Issue with the message `.submit`.  Then, click the `Comment` button.   
     ![image](https://github.com/user-attachments/assets/2c122636-cc61-42fb-bf4d-01115e7a6c06)
-8. A new comment will be added notifiing the [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) that the Issue is pending review.  Also, the Issue will be assigned a `submitted` label.
+9. A new comment will be added notifiing the [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) that the Issue is pending review.  Also, the Issue will be assigned a `submitted` label.
     
     ![image](https://github.com/user-attachments/assets/3d240bb3-a2dc-44aa-b8d5-f63963b27a28)
 11. Once submitted for review, the [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) will `approve` or `deny` the request.
