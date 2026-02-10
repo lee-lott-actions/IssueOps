@@ -6,28 +6,28 @@
 ![image](https://github.com/user-attachments/assets/376f5d9d-80bf-4765-ad12-44eb570e5f28)
 2. Click **New Issue**.
 ![image](https://github.com/user-attachments/assets/83b67a95-5ad7-40b8-a618-4909a58d6e43)
-4. Select the `Archive A Repository` template.
-![image](https://github.com/user-attachments/assets/5d2d2826-b7f1-4bdf-98ae-2d4628990704)
-5. Fill out the template with the required details.
+3. Select the `Archive A Repository` template.
+![image](https://github.com/user-attachments/assets/63674a08-a52d-4bfd-b4e3-6a68495051d0)
+4. Fill out the template with the required details.
    - Title - Replace `<Enter Repository Name>` with the name of the repository to be archived.
    - Repository Name - Provide the name of the repository to be archived.
    - Reason For Archiving - Provide a brief description as to why the repository should be archived.
 ![image](https://github.com/user-attachments/assets/dc62a79c-db4c-454f-bfe1-e7bf9f05324c)
-6. Click **Create**.
-7. The Issue will now be created.  Upon creation, a GitHub Action will run to validate the fields.  It may take a few moments for the validation to complete.
+7. Click **Create**.
+8. The Issue will now be created.  Upon creation, a GitHub Action will run to validate the fields.  It may take a few moments for the validation to complete.
     - If correct, a comment will be provided with instructions on how to submit the issue for review. Also, a validated label will be added to the issue.
       ![image](https://github.com/user-attachments/assets/3162d604-16c1-46e7-b4f6-d741f194ee42)
     - If it fails, a comment will be provided with information as to the cause of the problem.  The problem must be resolved in order to proceed with the process.  In the example below, the fields in the template were left blank.
       ![image](https://github.com/user-attachments/assets/ca61221e-eb72-4c21-b725-396ca8de83d9)
        - If the problem is with any of the required fields, please update them.  Upon saving, the Issue wil be re-validated automatically.
        - If the problem lies elsewhere and upon resolving the problem, please enter a new comment with the command `.validate`.  This will re-validate the Issue.
-8. Once the Issue has been validated and is ready to be submitted for review, enter a new comment in the Issue with the message `.submit`.  Then, click the `Comment` button.
+9. Once the Issue has been validated and is ready to be submitted for review, enter a new comment in the Issue with the message `.submit`.  Then, click the `Comment` button.
     ![image](https://github.com/user-attachments/assets/6b8b2a93-d70a-464d-adf6-68c0fd981136)
-9. A new comment will be added notifiing the [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) that the Issue is pending review.  Also, the Issue will be assigned a `submitted` label.
+10. A new comment will be added notifiing the [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) that the Issue is pending review.  Also, the Issue will be assigned a `submitted` label.
     ![image](https://github.com/user-attachments/assets/417bf6e0-6557-4d40-a3fc-d616eaca9992)
-10. Once submitted for review, the [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) will `approve` or `deny` the request.
+11. Once submitted for review, the [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) will `approve` or `deny` the request.
     - If approved, a GitHub Action will process the request.  Afterwards, a comment will be added to the Issue notifiying the process completed successfully.  The Issue will be closed and an `approved` label will be added to the Issue.  Time to go enjoy the new repository.
     ![image](https://github.com/user-attachments/assets/9f54a5a9-47e7-49b1-89e0-981c4e817bda)
     - If denied,  a comment will be added to the Issue noting the request was denied.  The Issue will be closed and a `denied` label will be added to the Issue.  The [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) may provide reasons for the denial.  Be sure to look for comments that may have been provided.
     ![image](https://github.com/user-attachments/assets/57c66365-49fe-4e90-95f4-2d489a42e70b)
-11. Regardless of the result, the `Archive A Repository` request is now complete.
+12. Regardless of the result, the `Archive A Repository` request is now complete.
