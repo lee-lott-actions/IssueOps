@@ -117,6 +117,11 @@ jobs:
           owner: ${{ github.repository_owner }}
           token: ${{ steps.token.outputs.token }}
           branch-name: 'development'
+
+      - name: Wait for Development Branch Creation
+        if: steps.create-repo.outputs.result == 'success'
+        run: sleep 10
+        shell: bash          
        
       - name: Update Repository Visibility to Internal
         if: steps.create-repo.outputs.result == 'success'
