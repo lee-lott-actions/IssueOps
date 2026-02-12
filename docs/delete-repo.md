@@ -3,7 +3,7 @@
 ## How to Submit a Request
 
 1. In the navigation menu at the top of the page, navigate to the **Issues** tab.
-![image](https://github.com/user-attachments/assets/51399269-652f-4cf4-96f7-be78ddfbcb46)
+![image](https://github.com/user-attachments/assets/376f5d9d-80bf-4765-ad12-44eb570e5f28)
 2. Click **New Issue**.
 ![image](https://github.com/user-attachments/assets/83b67a95-5ad7-40b8-a618-4909a58d6e43)
 3. Select the `Delete A Repository` template.
