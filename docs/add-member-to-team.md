@@ -33,5 +33,6 @@
    
     ![image](https://github.com/user-attachments/assets/eaec8523-572f-429e-ab7c-009b7f9f23f8)
     - If denied,  a comment will be added to the Issue noting the request was denied.  The Issue will be closed and a `denied` label will be added to the Issue.  The [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) may provide reasons for the denial.  Be sure to look for comments that may have been provided.
+   
     ![image](https://github.com/user-attachments/assets/57c66365-49fe-4e90-95f4-2d489a42e70b)
 11. Regardless of the result, the `Add Member To Team` request is now complete.
