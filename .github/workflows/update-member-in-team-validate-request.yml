@@ -158,7 +158,7 @@ jobs:
           
       # Add 'validated' label if validation succeeds
       - if: >-
-          job.status == 'success()'
+          job.status == 'success'
           && steps.validate.outputs.result == 'success'
           && steps.validate-team.outputs.team-exists == 'true'
           && steps.validate-member.outputs.member-exists == 'true'
