@@ -51,8 +51,7 @@ jobs:
           permission-contents: write                        #Used to create development branch
           permission-issues: write                          #Used to parse the issue body, Assign Issue to Commenter, write comments and close the issue
           permission-administration: write                  #Used to create the new repo & verify it was created and set visibility to Internal
-          permission-members: read                          #Used to verify commentor is a member of the Approver Team
-          permission-repository-custom-properties: write    #Used to enable build check custom property
+          permission-members: read                          #Used to verify commentor is a member of the Approver Team          
 
       - name: Parse Issue Body
         id: parse
@@ -118,6 +117,11 @@ jobs:
           owner: ${{ github.repository_owner }}
           token: ${{ steps.token.outputs.token }}
           branch-name: 'development'
+
+      - name: Wait for Development Branch Creation
+        if: steps.create-repo.outputs.result == 'success'
+        run: sleep 10
+        shell: bash          
        
       - name: Update Repository Visibility to Internal
         if: steps.create-repo.outputs.result == 'success'
@@ -227,8 +231,7 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           token: ${{ steps.token.outputs.token }}
           owner: ${{ github.repository_owner }}
-          repo-name: ${{ github.event.repository.name }}        
-
+          repo-name: ${{ github.event.repository.name }}
 
   load-matrix:
       name: Load Matrix
