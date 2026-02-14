@@ -17,6 +17,7 @@
 5. Click **Create**.
 6. The Issue will now be created.  Upon creation, a GitHub Action will run to validate the fields.  it may take a few moments for the validation to complete.
     - If correct, a comment will be provided with instructions on how to submit the issue for review. Also, a validated label will be added to the issue.
+      
       ![image](https://github.com/user-attachments/assets/d55b2187-1bf4-4a35-bbfe-754420623496)
     - If it fails, a comment will be provided with information as to the cause of the problem.  The problem must be resolved in order to proceed with the process.  In the example below, the team does not exist.
       ![image](https://github.com/user-attachments/assets/6a6d6c1c-6d24-4aae-936f-edaaf666ec64)
@@ -25,10 +26,13 @@
 7. Once the Issue has been validated and is ready to be submitted for review, enter a new comment in the Issue with the message `.submit`.  Then, click the `Comment` button.
     ![image](https://github.com/user-attachments/assets/6b8b2a93-d70a-464d-adf6-68c0fd981136)
 8. A new comment will be added notifiing the [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) that the Issue is pending review.  Also, the Issue will be assigned a `submitted` label.
+   
     ![image](https://github.com/user-attachments/assets/3d240bb3-a2dc-44aa-b8d5-f63963b27a28)
-9. Once submitted for review, the [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) will `approve` or `deny` the request.
+10. Once submitted for review, the [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) will `approve` or `deny` the request.
     - If approved, a GitHub Action will process the request.  Afterwards, a comment will be added to the Issue notifiying the process completed successfully.  The Issue will be closed and an `approved` label will be added to the Issue.  Time to go enjoy the new repository.
+      
     ![image](https://github.com/user-attachments/assets/0a98517a-4086-47ed-abd4-c7404e439bcf)
     - If denied,  a comment will be added to the Issue noting the request was denied.  The Issue will be closed and a `denied` label will be added to the Issue.  The [IssueOps Approvers Team](https://github.com/orgs/lee-lott-actions/teams/issue-ops-approvers) may provide reasons for the denial.  Be sure to look for comments that may have been provided.
+      
     ![image](https://github.com/user-attachments/assets/57c66365-49fe-4e90-95f4-2d489a42e70b)
-10. Regardless of the result, the `Add Team To Organization` request is now complete.
+11. Regardless of the result, the `Add Team To Organization` request is now complete.
