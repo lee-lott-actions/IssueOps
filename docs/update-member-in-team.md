@@ -13,7 +13,7 @@
    - Member Name - Provide the name of the GitHub Organzation member.
    - Team Name - Provide the name of the GitHub Organzation Team to which the member will be added.
    - Team Role - Select the role the member will have on the team.  If the member will need the ability to make changes to the team, select `Maintainer`, otherwise, select `Member`.
-![image](https://github.com/user-attachments/assets/3c7042d4-7545-4c0c-93b0-2179d4f39579)
+![image](https://github.com/user-attachments/assets/57ee7fa0-338b-4b5d-9ae3-b9e8662ec2f7)
 5. Click **Create**.
 6. The Issue will now be created.  Upon creation, a GitHub Action will run to validate the fields.  It may take a few moments for the validation to complete.
     - If correct, a comment will be provided with instructions on how to submit the issue for review. Also, a validated label will be added to the issue.
