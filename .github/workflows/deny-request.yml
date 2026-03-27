@@ -40,7 +40,7 @@ jobs:
 
       - name: Get GitHub App Token
         id: token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
           private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
