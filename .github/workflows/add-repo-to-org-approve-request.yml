@@ -105,8 +105,8 @@ jobs:
       
       - name: Wait for Repository Creation
         if: steps.create-repo.outputs.result == 'success'
-        run: sleep 10
-        shell: bash
+        run: Start-Sleep -Seconds 60
+        shell: pwsh
           
       - name: Create Development Branch
         if: steps.create-repo.outputs.result == 'success'
@@ -120,8 +120,8 @@ jobs:
 
       - name: Wait for Development Branch Creation
         if: steps.create-repo.outputs.result == 'success'
-        run: sleep 10
-        shell: bash          
+        run: Start-Sleep -Seconds 60
+        shell: pwsh          
        
       - name: Update Repository Visibility to Internal
         if: steps.create-repo.outputs.result == 'success'
