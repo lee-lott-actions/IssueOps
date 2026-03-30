@@ -40,7 +40,7 @@ jobs:
           app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
           private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          repositories: ${{ github.repository_name }}
+          repositories: ${{ github.event.repository.name }}
           permission-issues: write
 
       - name: Create Comment Message
