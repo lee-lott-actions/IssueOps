@@ -36,8 +36,7 @@ jobs:
         with:
           app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
           private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          
+          owner: ${{ github.repository_owner }}          
           permission-issues: write
           permission-members: read
 
