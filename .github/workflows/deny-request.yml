@@ -42,7 +42,7 @@ jobs:
         id: token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
+          client-id: ${{ vars.ISSUEOPSBOT_APP_ID }}
           private-key: ${{ secrets.ISSUEOPSBOT_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}          
           permission-issues: write
